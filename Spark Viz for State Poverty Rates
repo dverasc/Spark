@@ -1,0 +1,35 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import countDistinct,avg,stddev
+
+
+spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("aggs").getOrCreate()
+df = spark.read.csv(r'C:\Users\dveras\Downloads\Poverty-by-State.csv',inferSchema=True,header=True)
+#df.show()
+
+#from pyspark.sql.functions import countDistinct,avg,stddev
+#df.select(countDistinct('Sales')).show()
+#df.select(avg('Sales')).show()
+
+
+#df.filter( (df['Close'] < 200) & (df['Open'] > 200) ).show()
+df_FL = df.filter( (df['State'] == 'Florida') | (df['State'] == 'Alabama') | (df['State'] == 'Georgia') | (df['State'] == 'Arkansas') | (df['State'] == 'Louisiana') | (df['State'] == 'Mississippi') | (df['State'] == 'North Carolina') | (df['State'] == 'South Carolina') | (df['State'] == 'Tennessee') )
+                 #   )
+
+df_pandas = df_FL.toPandas()
+
+pivot_df = df_pandas.pivot(index='Year', columns ='State', values='Percent')
+pivot_df.plot.line(figsize=(15,15))
+plt.title('Poverty Percent Rates over Time in Southeast USA')
+plt.xlabel('Year')
+plt.ylabel('Percent Rate')
+#groupeddf = df_pandas['Percent'].groupby([df_pandas['State']])
+
+#df_pandas.head(20)
+
+
+#df_pandas.plot(x='Year',y='Percent',kind='line')
+#plt.show()
+
